@@ -1,0 +1,528 @@
+---
+swagger: "2.0"
+info:
+  description: "Workflow Service Event APIs handle orchestration of events using a\
+    \ workflow, with features such as :\r\n\r\nIntegration with OT2 foundation services\
+    \ for authentication and authorization\r\nAbility to manage required event definitions\r\
+    \nPublish events to or subscribe events from OT2 event channels"
+  version: "v1"
+  title: "Workflow Event REST API"
+basePath: "/workflow/v1/event"
+tags:
+- name: "Event Definitions"
+schemes:
+- "http"
+- "https"
+paths:
+  /event-definitions:
+    get:
+      tags:
+      - "Event Definitions"
+      summary: "List event definitions"
+      description: "List event definitions. \n\n"
+      operationId: "listEventDefinitions"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "version"
+        in: "query"
+        description: "Only return event definitions with the given version."
+        required: false
+        type: "integer"
+      - name: "name"
+        in: "query"
+        description: "Only return event definitions with the given name."
+        required: false
+        type: "string"
+      - name: "nameLike"
+        in: "query"
+        description: "Only return event definitions with a name like the given name."
+        required: false
+        type: "string"
+      - name: "key"
+        in: "query"
+        description: "Only return event definitions with the given key."
+        required: false
+        type: "string"
+      - name: "keyLike"
+        in: "query"
+        description: "Only return event definitions with a name like the given key."
+        required: false
+        type: "string"
+      - name: "category"
+        in: "query"
+        description: "Only return event definitions with the given category."
+        required: false
+        type: "string"
+      - name: "categoryLike"
+        in: "query"
+        description: "Only return event definitions with a category like the given\
+          \ name."
+        required: false
+        type: "string"
+      - name: "categoryNotEquals"
+        in: "query"
+        description: "Only return event definitions which do not have the given category."
+        required: false
+        type: "string"
+      - name: "deploymentId"
+        in: "query"
+        description: "Only return event definitions with the given category."
+        required: false
+        type: "string"
+      - name: "latest"
+        in: "query"
+        description: "Only return the latest event definition versions. Can only be\
+          \ used together with key and keyLike parameters, using any other parameter\
+          \ will result in a 400-response."
+        required: false
+        type: "boolean"
+      - name: "offset"
+        in: "query"
+        description: "Start position value in the list of items, used for pagination."
+        required: false
+        type: "string"
+      - name: "count"
+        in: "query"
+        description: "Number of items to be limited in the response, used for pagination.\
+          \ By default the count value is set to 10."
+        required: false
+        type: "string"
+      - name: "sort"
+        in: "query"
+        description: "Property to sort on, to be used together with the order."
+        required: false
+        type: "string"
+        enum:
+        - "name"
+        - "id"
+        - "key"
+        - "category"
+        - "deploymentId"
+        - "version"
+      - name: "filterByCurrentSubscription"
+        in: "query"
+        description: "Only return the event definitions with the current subscription"
+        required: false
+        type: "boolean"
+      - name: "deploymentSpace"
+        in: "query"
+        description: "Only return the event definitions with the given deployment\
+          \ space."
+        required: false
+        type: "string"
+      responses:
+        200:
+          description: "Indicates request was successful and the event definitions\
+            \ are returned"
+          schema:
+            $ref: "#/definitions/CollectionModelListWorkflowEventDefinitionResponse"
+        400:
+          description: "Indicates a parameter was passed in the wrong format or that\
+            \ latest is used with other parameters other than key and keyLike. The\
+            \ status-message contains additional information."
+      security:
+      - oAuth: []
+    post:
+      tags:
+      - "Event Definitions"
+      summary: "Create or update an event definition"
+      description: "Deploy the contents of event definition. \n\nIf the same event\
+        \ definition is updated and deployed again, a higher version of the event\
+        \ definition is deployed. New event instances are always created on the latest\
+        \ versions of the event definitions, and the previously triggered event instances\
+        \ continue to run on the corresponding older versions.The sample event definition\
+        \ is given below.\n\nTo use OT2 eventing service, specify 'eventType'(com.opentext.ot2.service_name.operationId)\
+        \ which is already registered in Event admin service, 'payload' is not required\
+        \ in this request. To register a new event type from workflow with event admin\
+        \ service, provide 'payload' along with 'eventType'(operationId) in the request.\
+        \ \n\nTo receive events from OT2 eventing service, your application has to\
+        \ - \n\n - Create webhook with callback url in this format - 'https://{hostname}/workflow/v1/events/{eventDefinitionKey}/callback',\
+        \ here, eventDefinitionKey is the key used for deploying ot2 event definition.\
+        \ \n\n - Subscription should be created for the eventType(com.opentext.ot2.service_name.operationId),\
+        \ to receive event information when events of this type are created. \n\n\
+        Sample request body : <br>{<br> &ensp; \"key\" : \"SampleEventKey\", <br>\
+        \ &ensp; \"name\": \"Sample event name\", <br> &ensp; \"category\": \"Sample\
+        \ category\", <br> &ensp; \"correlationParameters\": [ <br> &ensp; {<br> &emsp;\
+        \ \"name\" : \"sample parameter name\", <br> &emsp; \"type\" : \"string\"\
+        \ <br> &ensp; } <br> &ensp; ], <br> &ensp; \"payload\": [ <br> &ensp; {<br>\
+        \ &emsp; \"name\" : \"sample field name\", <br> &emsp; \"type\" : \"string\"\
+        \ <br> &ensp; } <br> &ensp; ], <br> &ensp; \"eventType\": [ <br> &emsp; \"\
+        SampleActionStarted\" <br> &ensp; ] <br> } \n"
+      operationId: "createOrUpdateEventDefinition"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/WorkflowEventDefinitionDeploymentRequest"
+      - in: "body"
+        name: "body"
+        description: "Create or update an event definition"
+        required: false
+        schema:
+          $ref: "#/definitions/WorkflowEventDefinitionDeploymentResource"
+      responses:
+        200:
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/EntityModelWorkflowEventDefinitionDeploymentResponse"
+        201:
+          description: "Indicates an event definition was created."
+        400:
+          description: "Indicates there was no content present in the request body\
+            \ or the content mime-type is not supported for event definition. The\
+            \ status-description contains additional information."
+      security:
+      - oAuth: []
+  /event-definitions/{eventDefinitionId}/model:
+    get:
+      tags:
+      - "Event Definitions"
+      summary: "Get an event definition model"
+      description: "Get an event definition model. \n\n"
+      operationId: "getEventDefinitionModel"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "eventDefinitionId"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Indicates the event definition was found and the model is\
+            \ returned. The response contains the full event definition model."
+          schema:
+            $ref: "#/definitions/EntityModelWorkflowEventDefinitionModelResponse"
+        404:
+          description: "Indicates the requested event definition was not found."
+      security:
+      - oAuth: []
+  /event-definitions/{eventId}:
+    delete:
+      tags:
+      - "Event Definitions"
+      summary: "Delete an event definition"
+      description: "Delete an event definition. \n\neventId is the id returned when\
+        \ an event definition is created. \n"
+      operationId: "deleteEventDefinition"
+      parameters:
+      - name: "eventId"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "Indicates an event definition was found and has been deleted.\
+            \ Response-body is intentionally empty."
+        404:
+          description: "Indicates the requested event definition was not found."
+      security:
+      - oAuth: []
+securityDefinitions:
+  oAuth:
+    type: "oauth2"
+    authorizationUrl: "https://na-1-dev.api.opentext.com/oauth2/token"
+    flow: "implicit"
+    scopes: {}
+definitions:
+  CollectionModel:
+    type: "object"
+    properties:
+      links:
+        readOnly: true
+        $ref: "#/definitions/Links"
+      content:
+        type: "array"
+        readOnly: true
+        items:
+          type: "object"
+  CollectionModelListWorkflowEventDefinitionResponse:
+    type: "object"
+    properties:
+      links:
+        readOnly: true
+        $ref: "#/definitions/Links"
+      content:
+        type: "array"
+        readOnly: true
+        items:
+          type: "array"
+          items:
+            $ref: "#/definitions/WorkflowEventDefinitionResponse"
+  EntityModel:
+    type: "object"
+    properties:
+      links:
+        readOnly: true
+        $ref: "#/definitions/Links"
+  EntityModelWorkflowEventDefinitionDeploymentResponse:
+    type: "object"
+    properties:
+      deploymentSpace:
+        type: "string"
+        example: "TENANT"
+        enum:
+        - "ALL"
+        - "TENANT"
+        - "SUBSCRIPTION"
+      category:
+        type: "string"
+        example: "SampleCategory"
+      subscriptionId:
+        type: "string"
+        example: "84694d30-2935-45e0-b354-48c3228ab5fe"
+      tenantId:
+        type: "string"
+        example: "56adec43-d43a-4112-9f49-cd7c64d1d75b"
+      deploymentTime:
+        type: "string"
+        format: "date-time"
+        example: "2010-10-13T14:54:26.750+02:00"
+      eventDefinitionId:
+        type: "string"
+        example: "976626f9-3391-11ea-b509-eeee0affefe7"
+      name:
+        type: "string"
+        example: "SampleDeployment"
+      key:
+        type: "string"
+        example: "SampleKey"
+      id:
+        type: "string"
+        example: "SampleDeployment:1:976626f9-3391-11ea-b509-eeee0affefe7"
+      version:
+        type: "integer"
+        format: "int32"
+        example: 1
+      eventType:
+        type: "string"
+        example: "ot2.eventType"
+      parentDeploymentId:
+        type: "string"
+        example: "034eedd5-3209-11ea-ad13-eeee0aff6857"
+      links:
+        readOnly: true
+        $ref: "#/definitions/Links"
+  EntityModelWorkflowEventDefinitionModelResponse:
+    type: "object"
+    properties:
+      deploymentSpace:
+        type: "string"
+        example: "TENANT"
+        enum:
+        - "ALL"
+        - "TENANT"
+        - "SUBSCRIPTION"
+      payload:
+        type: "array"
+        example: "[{\"name\": \"Id\"}, {\"type\": \"string\"}]"
+        items:
+          $ref: "#/definitions/WorkflowEventPayload"
+      correlationParameters:
+        type: "array"
+        example: "[{\"name\": \"Id\"}, {\"type\": \"string\"}]"
+        items:
+          $ref: "#/definitions/WorkflowEventCorrelationParameter"
+      outboundChannelKeys:
+        type: "array"
+        items:
+          type: "string"
+      inboundChannelKeys:
+        type: "array"
+        items:
+          type: "string"
+      name:
+        type: "string"
+        example: "Event name"
+      key:
+        type: "string"
+        example: "eventKey"
+      eventType:
+        type: "string"
+        example: "sample.ot2EventType"
+      links:
+        readOnly: true
+        $ref: "#/definitions/Links"
+  Links:
+    type: "object"
+    properties:
+      empty:
+        type: "boolean"
+  WorkflowEventCorrelationParameter:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      type:
+        type: "string"
+  WorkflowEventDefinitionDeploymentRequest:
+    type: "object"
+    properties:
+      key:
+        type: "string"
+        example: "sampleKey"
+      name:
+        type: "string"
+        example: "Sample name"
+      category:
+        type: "string"
+        example: "Sample category"
+      inboundChannelKeys:
+        type: "array"
+        items:
+          type: "string"
+      outboundChannelKeys:
+        type: "array"
+        items:
+          type: "string"
+      correlationParameters:
+        type: "array"
+        example: "[{\"name\": \"Id\"}, {\"type\": \"string\"}]"
+        items:
+          $ref: "#/definitions/WorkflowEventCorrelationParameter"
+      payload:
+        type: "array"
+        example: "[{\"name\": \"Id\"}, {\"type\": \"string\"}]"
+        items:
+          $ref: "#/definitions/WorkflowEventPayload"
+      eventType:
+        type: "string"
+        example: "com.opentext.ot2.service_name.operationId"
+        description: "Event type value provided by event admin service or a event\
+          \ type will be created with this, if payload is provided."
+      deploymentSpace:
+        type: "string"
+        example: "TENANT"
+        description: "Space to be deployed."
+  WorkflowEventDefinitionDeploymentResource:
+    type: "object"
+  WorkflowEventDefinitionDeploymentResponse:
+    type: "object"
+    properties:
+      deploymentSpace:
+        type: "string"
+        example: "TENANT"
+        enum:
+        - "ALL"
+        - "TENANT"
+        - "SUBSCRIPTION"
+      category:
+        type: "string"
+        example: "SampleCategory"
+      subscriptionId:
+        type: "string"
+        example: "84694d30-2935-45e0-b354-48c3228ab5fe"
+      tenantId:
+        type: "string"
+        example: "56adec43-d43a-4112-9f49-cd7c64d1d75b"
+      deploymentTime:
+        type: "string"
+        format: "date-time"
+        example: "2010-10-13T14:54:26.750+02:00"
+      eventDefinitionId:
+        type: "string"
+        example: "976626f9-3391-11ea-b509-eeee0affefe7"
+      name:
+        type: "string"
+        example: "SampleDeployment"
+      key:
+        type: "string"
+        example: "SampleKey"
+      id:
+        type: "string"
+        example: "SampleDeployment:1:976626f9-3391-11ea-b509-eeee0affefe7"
+      version:
+        type: "integer"
+        format: "int32"
+        example: 1
+      eventType:
+        type: "string"
+        example: "ot2.eventType"
+      parentDeploymentId:
+        type: "string"
+        example: "034eedd5-3209-11ea-ad13-eeee0aff6857"
+  WorkflowEventDefinitionModelResponse:
+    type: "object"
+    properties:
+      deploymentSpace:
+        type: "string"
+        example: "TENANT"
+        enum:
+        - "ALL"
+        - "TENANT"
+        - "SUBSCRIPTION"
+      payload:
+        type: "array"
+        example: "[{\"name\": \"Id\"}, {\"type\": \"string\"}]"
+        items:
+          $ref: "#/definitions/WorkflowEventPayload"
+      correlationParameters:
+        type: "array"
+        example: "[{\"name\": \"Id\"}, {\"type\": \"string\"}]"
+        items:
+          $ref: "#/definitions/WorkflowEventCorrelationParameter"
+      outboundChannelKeys:
+        type: "array"
+        items:
+          type: "string"
+      inboundChannelKeys:
+        type: "array"
+        items:
+          type: "string"
+      name:
+        type: "string"
+        example: "Event name"
+      key:
+        type: "string"
+        example: "eventKey"
+      eventType:
+        type: "string"
+        example: "sample.ot2EventType"
+  WorkflowEventDefinitionResponse:
+    type: "object"
+    properties:
+      deploymentSpace:
+        type: "string"
+        example: "TENANT"
+        enum:
+        - "ALL"
+        - "TENANT"
+        - "SUBSCRIPTION"
+      category:
+        type: "string"
+        example: "Sample category"
+      subscriptionId:
+        type: "string"
+        example: "84694d30-2935-45e0-b354-48c3228ab5fe"
+      tenantId:
+        type: "string"
+        example: "cda90802-4bcc-4134-9815-95b8ed50b516"
+      eventDefinitionId:
+        type: "string"
+        example: "034eedd5-3209-11ea-ad13-eeee0aff6857"
+      name:
+        type: "string"
+        example: "Sample Event"
+      key:
+        type: "string"
+        example: "SampleKey"
+      id:
+        type: "string"
+        example: "SampleKey:1:034eedd5-3209-11ea-ad13-eeee0aff6857"
+      version:
+        type: "integer"
+        format: "int32"
+        example: 1
+  WorkflowEventPayload:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      type:
+        type: "string"
