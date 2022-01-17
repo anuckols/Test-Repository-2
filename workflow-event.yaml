@@ -5,7 +5,7 @@ info:
     \ workflow, with features such as :\r\n\r\nIntegration with OT2 foundation services\
     \ for authentication and authorization\r\nAbility to manage required event definitions\r\
     \nPublish events to or subscribe events from OT2 event channels"
-  version: "v1.1"
+  version: "v1.2"
   title: "Workflow Event REST API"
 basePath: "/workflow/v1/event"
 tags:
