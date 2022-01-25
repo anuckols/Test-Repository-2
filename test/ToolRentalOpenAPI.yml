@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+  title: Tool Rental
+  version: 1.0.0
+servers:
+  - url: http://{{baseurl}}
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+paths:
+  /status:
+    get:
+      tags:
+        - default
+      summary: Status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /tools:
+    get:
+      tags:
+        - default
+      summary: Get All Tools
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+          example: '{{categoryId}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /tools/{toolId}:
+    get:
+      tags:
+        - default
+      summary: Get Single Tool
+      parameters:
+        - name: toolId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: '{{toolId}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /orders:
+    post:
+      tags:
+        - default
+      summary: Create Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example: "{\r\n \"toolId\": {{toolId}},\r\n \"customerName\": \"{{$randomFullName}}\"\r\n}"
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ''
+          in: header
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json: {}
+    get:
+      tags:
+        - default
+      summary: Get All Orders
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /orders/{orderId}:
+    get:
+      tags:
+        - default
+      summary: Get Single Order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: '{{orderId}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    patch:
+      tags:
+        - default
+      summary: Update Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                customerName: Joe Doe
+                comment: Pickup after whenever
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ''
+          in: header
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: '{{orderId}}'
+      responses:
+        '204':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - default
+      summary: Delete Order
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: ''
+          in: header
+          schema:
+            type: string
+        - name: orderId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: '{{orderId}}'
+      responses:
+        '204':
+          description: Successful response
+          content:
+            application/json: {}
+  /api-clients:
+    post:
+      tags:
+        - default
+      summary: Register API Client
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                clientName: Postman
+                clientEmail: monster.b@example.com
+      responses:
+        '201':
+          description: Successful response
+          content:
+            application/json: {}
