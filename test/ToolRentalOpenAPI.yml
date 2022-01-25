@@ -3,7 +3,7 @@ info:
   title: Tool Rental
   version: 1.0.0
 servers:
-  - url: http://{{baseurl}}
+  - url: https://simple-tool-rental-api.glitch.me
 components:
   securitySchemes:
     bearerAuth:
